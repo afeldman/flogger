@@ -29,10 +29,13 @@ def options(opt):
 def configure(conf):
     conf.load('compiler_cxx')
 
+    print('\n\nusing syslog.h')
+    print('setup /etc/syslog.conf of /etc/rsyslog.conf\n\n')
+    
 def build(bld):
     # flogger compile
     bld(features     = 'cxx cxxshlib',
-	source       = 'src/flogger.cc',
+	source       = 'src/sys_flogger.cc',
 	cxxflags     = ['-Wall','-std=c++11'],
         includes     = ['include'],
         install_path = '${PREFIX}/lib',
