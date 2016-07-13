@@ -21,7 +21,7 @@ namespace log{
     void warning(string *text);
     void notice(string *text);
     void debug(string *text);
-    
+
   private:
     static unique_ptr<Sys_Logger> m_instance;
     static once_flag m_onceFlag;

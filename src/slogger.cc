@@ -1,8 +1,8 @@
 extern "C" {
- #include <syslog.h>
+# include <syslog.h>
 }
 
-#include <flogger/flogger.hpp>
+#include <slogger/slogger.hpp>
 
 using namespace log;
 
@@ -10,25 +10,19 @@ unique_ptr<Sys_Logger> Sys_Logger::m_instance;
 
 once_flag Sys_Logger::m_onceFlag;
 
-Sys_Logger::Sys_Logger(string *name, int facility)
-{
-
+Sys_Logger::Sys_Logger(string *name, int facility){
   openlog(name->c_str(), LOG_CONS | LOG_PID | LOG_NDELAY, facility);
-  
 }
 
-void Sys_Logger::warning(string *text)
-{
+void Sys_Logger::warning(string *text){
   syslog (LOG_WARNING, "%s",text->c_str());
 }
 
-void Sys_Logger::debug(string *text)
-{
+void Sys_Logger::debug(string *text){
   syslog (LOG_DEBUG,"%s" ,text->c_str());
 }
 
-void Sys_Logger::notice(string *text)
-{
+void Sys_Logger::notice(string *text){
   syslog (LOG_NOTICE, "%s", text->c_str());
 }
 
@@ -54,7 +48,7 @@ void Sys_Logger::info(string *text)
 
 Sys_Logger::~Sys_Logger()
 {
-  closelog(); 
+  closelog();
 }
 
 Sys_Logger& Sys_Logger::GetInstance(string *name, int facility)
