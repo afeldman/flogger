@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # encoding: utf-8
 # waf script for builduing project
-# author: Anton Feldmann 
+# author: Anton Feldmann
 # Copyright 2016 anton.feldmann@gmail.com
 # license: MIT
 
 import os, sys
 from waflib import Build, TaskGen
 
-name = 'flogger'
+name = 'slogger'
 
 major  = 0
 minor  = 1
@@ -24,7 +24,7 @@ out = 'build'
 
 def options(opt):
     opt.load('compiler_cxx compiler_c')
-    
+
     #Add configuration options
     fopt = opt.add_option_group ("%s Options" % name.upper())
 
@@ -40,37 +40,37 @@ def options(opt):
 def configure(conf):
 
     from waflib import Options
-    
+
     if os.name == 'posix':
         if Options.options.clang :
             conf.load('clang clang++')
         else:
             conf.load('compiler_cxx compiler_c')
-            
+
         print('\n\nusing syslog.h')
         print('setup /etc/syslog.conf of /etc/rsyslog.conf\n\n')
     else:
         conf.load('compiler_cxx compiler_c')
-    
+
 def build(bld):
 
     from waflib import Options
     if os.name == 'posix':
         # flogger compile
         syslog =bld(features     = ['cxx'],
-	            source       = 'src/sys_flogger.cc',
+	            source       = 'src/slogger.cc',
 	            cxxflags     = ['-Wall','-std=c++11'],
                     includes     = ['include'],
                     install_path = '${PREFIX}/lib',
 	            target       = name)
-        
+
         if Options.options.clang:
             syslog.cxxflags.append('-stdlib=libstdc++')
 
         syslog.features.append('cxxshlib' if Options.options.shared else 'cxxstlib')
-        
+
     # flogger headerfile install
-    bld.install_files('${PREFIX}/include/flogger/', bld.path.ant_glob(['include/flogger/*.hpp'], remove=False))
+    bld.install_files('${PREFIX}/include/slogger/', bld.path.ant_glob(['include/slogger/*.hpp'], remove=False))
 
 # process flogger.pc.in -> flogger.pc - by default it use the task "env" attribute
     pcf = bld(
@@ -81,7 +81,7 @@ def build(bld):
         )
 
     pcf.env.table.update(
-        {'LIBS':' -l%s'  % 'flogger', 
+        {'LIBS':' -l%s'  % 'slogger',
          'VERSION': version,
          'NAME': name,
          'PREFIX': '%s' % Options.options.prefix,

@@ -28,6 +28,9 @@ namespace log{
     Sys_Logger(string *name, int facility);
     Sys_Logger(const Sys_Logger& src) = delete;
     Sys_Logger& operator=(const Sys_Logger& rhs) = delete;
+
+  private:
+    mutex mu_safe;
   };
 
 }
