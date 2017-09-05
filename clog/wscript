@@ -1,0 +1,107 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# Anton Feldmann AT gmail dot com
+
+#Copyright (c) 2012 anton.feldmann@gmail.com
+#Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation  files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy,  modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the  Software is furnished to do so, subject to the following conditions:
+#The above copyright notice and this permission notice shall be included in all copies or substantial portions of the  Software.
+
+#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE  WARRANTIES# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+name='cLog'
+
+major  = 1
+minor  = 0
+bugfix = 0
+
+name_version = '%s-%d.%d.%d' % (name, major, minor, bugfix)
+
+application = name
+version     = '%d.%d.%d' % (major, minor, bugfix)
+
+top='.'
+out='build'
+
+
+def options(opt):
+	opt.load('compiler_c compiler_cxx')
+
+	opt.add_option('--shared',
+		       action='store_true',
+		       default=False,
+		       help='build all libs as shared libs')
+	opt.add_option('--test',
+		       action='store_true',
+		       default=False,
+		       help='build all libs as shared libs')
+	
+def configure(conf):
+	conf.env.CC  = 'clang'
+	conf.env.CXX = 'clang++'
+
+	conf.load('compiler_c compiler_cxx')
+
+	conf.check_cc(lib='pthread',
+		      mandatory=True,
+		      uselib_store='PTHREAD')
+
+def build(bld):
+	libs = ['PTHREAD']
+	incs = ['./include']
+
+	_c=bld(features=['c'],
+	       source='src/clogger.c',
+	       target=name,
+	       cflags= ['-lpthread','-O3'],
+	       includes=incs,
+	       use=libs,
+	       install_path = '${PREFIX}/lib/'
+	       )
+	_cpp=bld(features=['cxx'],
+		 source='src/logger.cpp',
+		 target='c'+name,
+		 cxxflags= ['-lpthread','-O3'],
+		 install_path = '${PREFIX}/lib/',
+		 includes=incs
+		 )
+
+
+	from waflib import Options
+	_cpp.features.append('cxxshlib' if Options.options.shared else 'cxxstlib')
+	_c.features.append('cshlib' if Options.options.shared else 'cstlib')
+
+	if Options.options.test:
+		bld(features='c cprogram',
+		    source='test/testlog.c',
+		    target='Ctestapp',
+		    use=['PTHREAD','%s' % name],
+		    lib=['pthread'],
+		    includes='./include/',
+		    install_path = './build/'
+		    )
+		
+		bld(features='cxx cxxprogram',
+		    source='test/testlog.cpp',
+		    target='CPPtestapp',
+		    use=['CPP','c%s'%name],
+		    includes='./include/',
+		    install_path = './build/'
+		    )
+		
+	bld.install_files('${PREFIX}/include/%s/' % name, bld.path.ant_glob(['**/*.hpp','**/*.h'], remove=False))
+
+	pcf = bld(
+		features = 'subst',
+		source = '%s.pc.in' % name,
+		target = '%s.pc' % name,
+		install_path = '${PREFIX}/lib/pkgconfig/'
+		)
+	
+	pcf.env.table.update(
+		{'LIBS':'-l%s -lc%s'  % (name,name),
+		 'VERSION': version,
+		 'NAME': name,
+		 'PREFIX': '%s' % Options.options.prefix,
+		 'INCLUDEDIR': 'include/%s' % name}
+        )
+
