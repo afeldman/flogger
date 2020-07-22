@@ -1,5 +1,5 @@
-#ifndef __FLOGGER_HPP__
-#define __FLOGGER_HPP__
+#ifndef __SLOGGER_HPP__
+#define __SLOGGER_HPP__
 
 #include <string>
 #include <memory>
